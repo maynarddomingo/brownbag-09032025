@@ -1,0 +1,60 @@
+#EKS roles
+#Cluster Role (for EKS Control Plane)
+#This role is assumed by the EKS control plane.
+#It needs the AmazonEKSClusterPolicy managed policy.
+
+aws iam create-role \
+  --role-name EKS-ClusterRole \
+  --assume-role-policy-document '{
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Effect": "Allow",
+        "Principal": { "Service": "eks.amazonaws.com" },
+        "Action": "sts:AssumeRole"
+      }
+    ]
+  }'
+
+  aws iam attach-role-policy \
+  --role-name EKS-ClusterRole \
+  --policy-arn arn:aws:iam::aws:policy/AmazonEKSClusterPolicy 
+
+#Node Group Role (for Worker Nodes / EC2)
+#This role is assumed by the EC2 instances that join your cluster.
+#It needs 3 managed policies:
+#AmazonEKSWorkerNodePolicy
+#AmazonEKS_CNI_Policy
+#AmazonEC2ContainerRegistryReadOnly
+
+#Create the IAM role
+aws iam create-role \
+  --role-name EKS-NodeRole \
+  --assume-role-policy-document '{
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Effect": "Allow",
+        "Principal": { "Service": "ec2.amazonaws.com" },
+        "Action": "sts:AssumeRole"
+      }
+    ]
+  }'
+
+#Attach policies
+
+aws iam attach-role-policy \
+  --role-name EKS-NodeRole \
+  --policy-arn arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy
+
+aws iam attach-role-policy \
+  --role-name EKS-NodeRole \
+  --policy-arn arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy
+
+aws iam attach-role-policy \
+  --role-name EKS-NodeRole \
+  --policy-arn arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
+
+#Grab the Role ARNs
+aws iam get-role --role-name EKS-ClusterRole --query "Role.Arn" --output text
+aws iam get-role --role-name EKS-NodeRole --query "Role.Arn" --output text

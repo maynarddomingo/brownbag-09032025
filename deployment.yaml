@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-website
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx-website
+  template:
+    metadata:
+      labels:
+        app: nginx-website
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:latest
+        ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-website-svc
+spec:
+  type: LoadBalancer
+  selector:
+    app: nginx-website
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
